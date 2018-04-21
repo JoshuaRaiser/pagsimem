@@ -17,6 +17,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import model.Alocador;
 import model.Memoria;
+import model.MemoriaFisica;
+import model.MemoriaListener;
 import model.Processo;
 
 /*
@@ -28,12 +30,11 @@ import model.Processo;
  *
  * @author Joshua Raiser
  */
-public class PagSimem extends javax.swing.JFrame {
-
-    final int NUM_PROPRIEDADES = 4;
+public class PagSimem extends javax.swing.JFrame implements MemoriaListener{
     
     List<Processo> Processos;
-
+    MemoriaFisica memoria;
+    
     /**
      * Creates new form PagSimem
      */
@@ -364,9 +365,16 @@ public class PagSimem extends javax.swing.JFrame {
         if (!caminhoArquivo.equals("")) {
             try {
                 //lerArquivo(caminhoArquivo);
+                textoLog.append("\nCarregando arquivo...\n Buscando dados em: "+caminhoArquivo);
                 carregarProcessosFromFile(caminhoArquivo);
+                textoLog.append("\nArquivo válido carregado com sucesso!");
             } catch (IOException ex) {
-                Logger.getLogger(PagSimem.class.getName()).log(Level.SEVERE, null, ex);
+                textoLog.append("\n\n ** ERRO **\n\nSaída inesperada: o arquivo informado é inválido");
+                JOptionPane.showMessageDialog(null, "\n O arquivo informado é inválido!", "Erro - PagSimem - Simulador de Paginação de Memória", JOptionPane.ERROR_MESSAGE);
+            } catch (ArrayIndexOutOfBoundsException e)
+            {
+                textoLog.append("\n\n ** ERRO **\n\nSaída inesperada: os dados do arquivo são inválidos");
+                JOptionPane.showMessageDialog(null, "\n Os dados do arquivo são inválidos!", "Erro - PagSimem - Simulador de Paginação de Memória", JOptionPane.ERROR_MESSAGE);   
             }
         }
     }//GEN-LAST:event_btnImportarArquivoActionPerformed
@@ -450,21 +458,20 @@ public class PagSimem extends javax.swing.JFrame {
         int tamPagina = Integer.parseInt(txtAreaTamanhoPagina.getText());
         int tempoCiclo = Integer.parseInt(txtAreaTempo.getText());
         
-        Memoria memoria = new Memoria(tamMemoria, tamPagina);
+        if(tamMemoria%tamPagina != 0)
+        {
+            textoLog.append("\n\n ** ERRO **\n\nSaída inesperada: Números informados não correspondem");
+            textoLog.append("\nMod da operação é diferente de zero ( tamanho_da_memoria % tamanho_da_pagina = "+ (tamMemoria%tamPagina) +").\nInsira novos valores");
+            JOptionPane.showMessageDialog(null, "\nMod da operação é diferente de zero\n(tamanho_da_memória % tamanho_da_pagina = "+ (tamMemoria%tamPagina) +")", "Erro - PagSimem - Simulador de Paginação de Memória", JOptionPane.ERROR_MESSAGE);
+        }
+        else
+        {
+            memoria = new MemoriaFisica(tamMemoria, tamPagina);
+            memoria.addListener(this);
         
-        montarMemoriaFisica(memoria);
-        Alocador aloc = new Alocador(tempoCiclo, Processos, memoria);       
-        
+            new Alocador(tempoCiclo, Processos, memoria).start();  
+        }
     }//GEN-LAST:event_btnSimularActionPerformed
-    
-    void montarMemoriaFisica(Memoria memoriaFisica)
-    {
-        DefaultTableModel model;
-        model = new DefaultTableModel(new Object[]{"Endereço", "Processo"}, 0);
-        tabelaMemoriaFisica.setModel(model);
-        memoriaFisica.getRegistros().forEach(memoriaRegistro -> 
-                model.addRow(new Object[]{ memoriaRegistro.getEndereco() , memoriaRegistro.getValor() }));
-    }    
     
     void carregarProcessosFromFile(String filename) throws IOException
     {
@@ -546,4 +553,13 @@ public class PagSimem extends javax.swing.JFrame {
     private javax.swing.JFormattedTextField txtAreaTamanhoPagina;
     private javax.swing.JFormattedTextField txtAreaTempo;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public void atualiza() {
+        DefaultTableModel model;
+        model = new DefaultTableModel(new Object[]{"Endereço", "Processo"}, 0);
+        tabelaMemoriaFisica.setModel(model);
+        memoria.getRegistros().forEach(memoriaRegistro -> 
+                model.addRow(new Object[]{ memoriaRegistro.getEndereco() , memoriaRegistro.getValor() }));
+    }
 }

@@ -17,10 +17,11 @@ import util.BinUtil;
  */
 public class Memoria {
 
-    private final int tamanho;
-    private final int tamanhoPagina;
+    final int tamanho;
+    final int tamanhoPagina;
 
-    private final List<MemoriaRegistro> registros;
+    final List<MemoriaRegistro> registros;
+    final List<MemoriaListener> listeners;
     
     public Memoria(int tamanho, int tamanhoPagina) {
         this.tamanho = tamanho;
@@ -28,9 +29,11 @@ public class Memoria {
         this.registros = new ArrayList<>();
 
         int quantidade = Integer.toString(this.tamanho, 2).length();
-        for (int i = 0; i < this.tamanho; i++) {
+        for (int i = 0; i < this.tamanho; i++)
+        {
             this.registros.add(new MemoriaRegistro(BinUtil.formatarBinario(Integer.toString(i, 2), quantidade), ""));
         }
+        this.listeners = new ArrayList<>();
     }
 
     public int getTamanhoPagina() {
@@ -40,5 +43,16 @@ public class Memoria {
     public List<MemoriaRegistro> getRegistros() {
         return this.registros;
     }
-
+    
+    public void addListener(MemoriaListener memListerner)
+    {
+        listeners.add(memListerner);
+        memListerner.atualiza();
+    }
+    
+    public void notificarListeners()
+    {
+        listeners.forEach(l -> l.atualiza());
+    }
+    
 }

@@ -14,7 +14,7 @@ public class BinUtil {
     public static String formatarBinario(String binarioAtual, int comprimento)
     {
         String zeros = "";
-        for (int i = 0; i < comprimento - binarioAtual.length(); ++i) {
+        for (int i = 0; i < comprimento - binarioAtual.length()-1; ++i) {
             zeros += "0";
         }
         return zeros + binarioAtual;

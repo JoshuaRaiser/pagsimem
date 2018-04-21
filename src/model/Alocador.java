@@ -7,7 +7,8 @@ package model;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.table.DefaultTableModel;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -15,62 +16,72 @@ import javax.swing.table.DefaultTableModel;
  */
 public class Alocador extends Thread {
 
-    private int tempo;
-    private List<Processo> processos;
-    private Memoria memoriaFisica;
-    private Memoria memoriaLogica;
-    private List<Processo> filaEspera;
-    
-    public Alocador(int tempo, List<Processo> processos, Memoria memoriaFisica)
+    private final int tempo;
+    private final List<Processo> processos;
+    private final MemoriaFisica memoriaFisica;
+    private final MemoriaLogica memoriaLogica;
+    private final List<Processo> filaEspera;
+    private final TabelaPagina tabelaPagina;
+
+    public Alocador(int tempo, List<Processo> processos, MemoriaFisica memoriaFisica)
     {
         this.tempo = tempo;
         this.processos = processos;
         this.memoriaFisica = memoriaFisica;
-        this.memoriaLogica = new Memoria(0, this.memoriaFisica.getTamanhoPagina());
+        this.memoriaLogica = new MemoriaLogica(this.memoriaFisica.getTamanhoPagina());
         this.filaEspera = new ArrayList<>();
+        this.tabelaPagina = new TabelaPagina(this.memoriaFisica, this.memoriaLogica);
     }
         
     @Override
     public void run() 
     {
-        for(Processo processo : filaEspera)
-        {
-            if (alocar(processo))
-            {
-                filaEspera.remove(processo);
-            }
-        }
+        System.out.println("Demonio");
+        filaEspera.stream().filter((processo) -> (alocar(processo))).forEachOrdered((processo) -> {
+            filaEspera.remove(processo);
+        });
         
-        for(Processo processo : processos)
-        {
+        List<Processo> processosRemover = new ArrayList<>();
+        
+        processos.forEach((processo) -> {
             if(processo.getTempoCriacao() == 1)
             {
                 if(!alocar(processo))
                 {
                     filaEspera.add(processo);
                 }
-                processos.remove(processo);
+                //processos.remove(processo);
+                
+                processosRemover.add(processo);
             }
             else
             {
                 processo.setTempoCriacao(processo.getTempoCriacao()-1);
                 processo.setTempoRemocao(processo.getTempoRemocao()-1);
             }
+        });
+        
+        processos.removeAll(processosRemover);
+        
+        try {
+            sleep(tempo);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Alocador.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
     private boolean alocar(Processo processo)
     {
-        if()
+        if(memoriaFisica.cabe(processo))
         {
-            
-            
+            System.out.println("Cabe: " + processo);
+            List<String> enderecos = memoriaFisica.alocar(processo);
+            memoriaLogica.alocar(processo, enderecos);
             return true;
-            
         }
+        
+        System.out.println("Nao Cabe: " + processo);
         return false;
     }
-
-    
     
 }
