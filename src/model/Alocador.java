@@ -36,37 +36,41 @@ public class Alocador extends Thread {
     @Override
     public void run() 
     {
-        System.out.println("Demonio");
-        filaEspera.stream().filter((processo) -> (alocar(processo))).forEachOrdered((processo) -> {
-            filaEspera.remove(processo);
-        });
-        
-        List<Processo> processosRemover = new ArrayList<>();
-        
-        processos.forEach((processo) -> {
-            if(processo.getTempoCriacao() == 1)
-            {
-                if(!alocar(processo))
+        while (true) {
+            if (filaEspera.isEmpty() && processos.isEmpty()) {
+                break;
+            }
+            
+            filaEspera.stream().filter((processo) -> (alocar(processo))).forEachOrdered((processo) -> {
+                filaEspera.remove(processo);
+            });
+
+            List<Processo> processosRemover = new ArrayList<>();
+
+            processos.forEach((processo) -> {
+                if(processo.getTempoCriacao() == 1)
                 {
-                    filaEspera.add(processo);
+                    if(!alocar(processo))
+                    {
+                        filaEspera.add(processo);
+                    }
+
+                    processosRemover.add(processo);
                 }
-                //processos.remove(processo);
-                
-                processosRemover.add(processo);
+                else
+                {
+                    processo.setTempoCriacao(processo.getTempoCriacao()-1);
+                    processo.setTempoRemocao(processo.getTempoRemocao()-1);
+                }
+            });
+
+            processos.removeAll(processosRemover);
+            
+            try {
+                sleep(tempo);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Alocador.class.getName()).log(Level.SEVERE, null, ex);
             }
-            else
-            {
-                processo.setTempoCriacao(processo.getTempoCriacao()-1);
-                processo.setTempoRemocao(processo.getTempoRemocao()-1);
-            }
-        });
-        
-        processos.removeAll(processosRemover);
-        
-        try {
-            sleep(tempo);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(Alocador.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
@@ -74,13 +78,11 @@ public class Alocador extends Thread {
     {
         if(memoriaFisica.cabe(processo))
         {
-            System.out.println("Cabe: " + processo);
             List<String> enderecos = memoriaFisica.alocar(processo);
             memoriaLogica.alocar(processo, enderecos);
             return true;
         }
         
-        System.out.println("Nao Cabe: " + processo);
         return false;
     }
     
