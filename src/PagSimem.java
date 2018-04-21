@@ -1,4 +1,5 @@
 
+import com.sun.xml.internal.ws.util.StringUtils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -7,10 +8,15 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableModel;
+import model.Alocador;
+import model.Memoria;
 import model.Processo;
 
 /*
@@ -27,7 +33,6 @@ public class PagSimem extends javax.swing.JFrame {
     final int NUM_PROPRIEDADES = 4;
     
     List<Processo> Processos;
-    
 
     /**
      * Creates new form PagSimem
@@ -53,7 +58,19 @@ public class PagSimem extends javax.swing.JFrame {
         jPanel4 = new javax.swing.JPanel();
         btnImportarArquivo = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
+        txtAreaTamanhoMemoria = new javax.swing.JFormattedTextField();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        txtAreaTamanhoPagina = new javax.swing.JFormattedTextField();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        btnSimular = new javax.swing.JButton();
+        txtAreaTempo = new javax.swing.JFormattedTextField();
+        jLabel6 = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
         jPanel5 = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tabelaMemoriaFisica = new javax.swing.JTable();
         jScrollPane2 = new javax.swing.JScrollPane();
         textoLog = new javax.swing.JTextArea();
         btnSalvarLogTxt = new javax.swing.JButton();
@@ -125,6 +142,41 @@ public class PagSimem extends javax.swing.JFrame {
 
         jLabel1.setText("Importar arquivo");
 
+        txtAreaTamanhoMemoria.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
+        txtAreaTamanhoMemoria.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtAreaTamanhoMemoriaActionPerformed(evt);
+            }
+        });
+
+        jLabel2.setText("Tamanho Memória");
+
+        jLabel3.setText("B");
+
+        txtAreaTamanhoPagina.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
+        txtAreaTamanhoPagina.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtAreaTamanhoPaginaActionPerformed(evt);
+            }
+        });
+
+        jLabel4.setText("Tamanho da Página");
+
+        jLabel5.setText("B");
+
+        btnSimular.setText("simular");
+        btnSimular.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSimularActionPerformed(evt);
+            }
+        });
+
+        txtAreaTempo.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
+
+        jLabel6.setText("Ciclo de Tempo");
+
+        jLabel7.setText("ms");
+
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
@@ -134,30 +186,106 @@ public class PagSimem extends javax.swing.JFrame {
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btnImportarArquivo)
                     .addComponent(jLabel1))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(47, 47, 47)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addComponent(jLabel6)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel4Layout.createSequentialGroup()
+                                .addComponent(txtAreaTamanhoMemoria, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jLabel3))
+                            .addComponent(jLabel2)
+                            .addGroup(jPanel4Layout.createSequentialGroup()
+                                .addComponent(txtAreaTempo, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jLabel7)))
+                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel4Layout.createSequentialGroup()
+                                .addGap(45, 45, 45)
+                                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(jLabel4)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
+                                        .addComponent(txtAreaTamanhoPagina)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jLabel5)))
+                                .addContainerGap())
+                            .addGroup(jPanel4Layout.createSequentialGroup()
+                                .addGap(18, 18, Short.MAX_VALUE)
+                                .addComponent(btnSimular))))))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addGap(6, 6, 6)
-                .addComponent(jLabel1)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(jLabel2)
+                    .addComponent(jLabel4))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnImportarArquivo)
-                .addContainerGap(63, Short.MAX_VALUE))
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnImportarArquivo)
+                    .addComponent(txtAreaTamanhoMemoria, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel3)
+                    .addComponent(txtAreaTamanhoPagina, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel5))
+                .addGap(18, 18, 18)
+                .addComponent(jLabel6)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 8, Short.MAX_VALUE)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnSimular)
+                    .addComponent(txtAreaTempo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel7)))
         );
 
         jPanel5.setBackground(new java.awt.Color(255, 255, 255));
         jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "MAPA DE MEMÓRIA FÍSICA", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Courier New", 0, 12))); // NOI18N
 
+        tabelaMemoriaFisica.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null}
+            },
+            new String [] {
+                "Endereço", "Processo"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jScrollPane1.setViewportView(tabelaMemoriaFisica);
+
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
         jPanel5Layout.setHorizontalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 413, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(20, 20, 20))
         );
         jPanel5Layout.setVerticalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 596, Short.MAX_VALUE)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 521, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         textoLog.setEditable(false);
@@ -186,31 +314,29 @@ public class PagSimem extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(btnSalvarLogTxt)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 89, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 480, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, 209, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(21, 21, 21))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane2)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(btnSalvarLogTxt)
-                                .addGap(0, 0, Short.MAX_VALUE))))
-                    .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
+                            .addComponent(btnSalvarLogTxt)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -221,7 +347,7 @@ public class PagSimem extends javax.swing.JFrame {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
 
         pack();
@@ -236,7 +362,12 @@ public class PagSimem extends javax.swing.JFrame {
             caminhoArquivo += abrir.getSelectedFile().getAbsolutePath();
         }
         if (!caminhoArquivo.equals("")) {
-            lerArquivo(caminhoArquivo);
+            try {
+                //lerArquivo(caminhoArquivo);
+                carregarProcessosFromFile(caminhoArquivo);
+            } catch (IOException ex) {
+                Logger.getLogger(PagSimem.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }//GEN-LAST:event_btnImportarArquivoActionPerformed
 
@@ -304,63 +435,57 @@ public class PagSimem extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btnSalvarLogTxtActionPerformed
 
-    void lerArquivo(String caminhoArquivo) {
-        boolean sucesso = false;
-        String conteudoArquivo[] = null;
-        try {
-            FileReader fileReader = new FileReader(caminhoArquivo);
+    private void txtAreaTamanhoMemoriaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtAreaTamanhoMemoriaActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtAreaTamanhoMemoriaActionPerformed
 
-            BufferedReader bufferedReader = new BufferedReader(fileReader);
+    private void txtAreaTamanhoPaginaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtAreaTamanhoPaginaActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtAreaTamanhoPaginaActionPerformed
 
-            String linhas = "";
-            String br;
-            while ((br = bufferedReader.readLine()) != null) {
-                linhas += br;
-            }
-            fileReader.close();
-            bufferedReader.close();
-            conteudoArquivo = linhas.split(Pattern.quote(","));
-            textoLog.append("\n\nCarregando arquivo em: " + caminhoArquivo + "\n");
-            textoLog.append("* sequencia de dados encontrada: " + linhas);
-            sucesso = true;
-        } catch (IOException e) {
-            textoLog.append("\n\n ** ERRO **: o arquivo selecionado gerou uma saída inesperada do sistema.\nSaída inesperada: " + e.getMessage());
-            JOptionPane.showMessageDialog(null, "Erro de arquivo\n--:" + e.getMessage().toString(), "Erro - PagSimem - Simulador de Paginação de Memória", JOptionPane.ERROR_MESSAGE);
+    private void btnSimularActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSimularActionPerformed
+        // TODO add your handling code here:
+        
+        int tamMemoria = Integer.parseInt(txtAreaTamanhoMemoria.getText());
+        int tamPagina = Integer.parseInt(txtAreaTamanhoPagina.getText());
+        int tempoCiclo = Integer.parseInt(txtAreaTempo.getText());
+        
+        Memoria memoria = new Memoria(tamMemoria, tamPagina);
+        
+        montarMemoriaFisica(memoria);
+        Alocador aloc = new Alocador(tempoCiclo, Processos, memoria);       
+        
+    }//GEN-LAST:event_btnSimularActionPerformed
+    
+    void montarMemoriaFisica(Memoria memoriaFisica)
+    {
+        DefaultTableModel model;
+        model = new DefaultTableModel(new Object[]{"Endereço", "Processo"}, 0);
+        tabelaMemoriaFisica.setModel(model);
+        memoriaFisica.getRegistros().forEach(memoriaRegistro -> 
+                model.addRow(new Object[]{ memoriaRegistro.getEndereco() , memoriaRegistro.getValor() }));
+    }    
+    
+    void carregarProcessosFromFile(String filename) throws IOException
+    {
+        BufferedReader bufferedReader = new BufferedReader(new FileReader(filename));
+        
+        String line;
+        while (null != (line = bufferedReader.readLine())) {
+            if (line.equals("")) continue;
+            
+            String[] dados = line.replaceAll("\\s+", "").split(",");
+            Processos.add(new Processo(
+                    dados[0], 
+                    Integer.parseInt(dados[1]), 
+                    Integer.parseInt(dados[2]), 
+                    Integer.parseInt(dados[3])
+            ));
         }
-        if (sucesso)
-        {
-            carregarProcessos(conteudoArquivo);
-        }
+        
+        Processos.forEach(processo -> System.out.println(processo));
     }
     
-    void carregarProcessos(String[] conteudoArquivo)
-    {
-        int aux = 0;
-        try {
-            while(aux < conteudoArquivo.length)
-            {            
-                String ID = conteudoArquivo[aux].toString().trim();
-                aux++;
-                int tempoC = Integer.parseInt(conteudoArquivo[aux].trim());
-                aux++;
-                int tempR = Integer.parseInt(conteudoArquivo[aux].trim());
-                aux++;
-                int bytes = Integer.parseInt(conteudoArquivo[aux].trim());
-                aux++;
-                Processo processo = new Processo(ID, tempoC, tempR, bytes);
-                System.out.println(processo.toString());
-                Processos.add(processo);
-            }            
-        } catch (Exception e)
-        {
-            // ERRO DE SAÍDA 1
-            textoLog.append("\n\n ** ERRO **: o arquivo informado não está no formato corredo para este programa.\nSaída inesperada: " + e.getMessage());
-            JOptionPane.showMessageDialog(null, "Formato errado de arquivo.\nErro de saída: " + e.getMessage(), "Erro - PagSimem - Simulador de Paginação de Memória", JOptionPane.ERROR_MESSAGE);
-        }
-            
-        
-    }
-
     /**
      * @param args the command line arguments
      */
@@ -399,14 +524,26 @@ public class PagSimem extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnImportarArquivo;
     private javax.swing.JButton btnSalvarLogTxt;
+    private javax.swing.JButton btnSimular;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JTable tabelaFilaProcessos;
+    private javax.swing.JTable tabelaMemoriaFisica;
     private javax.swing.JTextArea textoLog;
+    private javax.swing.JFormattedTextField txtAreaTamanhoMemoria;
+    private javax.swing.JFormattedTextField txtAreaTamanhoPagina;
+    private javax.swing.JFormattedTextField txtAreaTempo;
     // End of variables declaration//GEN-END:variables
 }
