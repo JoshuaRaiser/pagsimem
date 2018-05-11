@@ -14,8 +14,11 @@ import java.util.List;
  */
 public class MemoriaFisica extends Memoria{
     
+    private final List<Processo> processos;
+    
     public MemoriaFisica(int tamanho, int tamanhoPagina) {
         super(tamanho, tamanhoPagina);
+        processos = new ArrayList<>();
     }
     
     public boolean cabe(Processo processo)
@@ -47,8 +50,41 @@ public class MemoriaFisica extends Memoria{
                 }
             }
         }
+        
+        processos.add(processo);
+        
         notificarListeners();
         return enderecos;
     }
+
+    public List<Processo> getProcessos() {
+        return processos;
+    }
+
+    public boolean desalocar(Processo processo) {
+        if (processo.getTempoRemocao() == 1)
+        {
+            //processos.remove(processo);
+            for (MemoriaRegistro registro : registros) 
+            {
+                if (processo.getID().equalsIgnoreCase(registro.getValor()))
+                {
+                    registro.setValor("");
+                }
+            }
+            
+            notificarListeners();
+            
+            return true;
+        }
+        
+        processo.setTempoRemocao(processo.getTempoRemocao() - 1);
+        return false;
+    }
+    
+    public boolean isEmpty()
+    {
+        return registros.stream().filter(memoriaRegistro -> memoriaRegistro.getValor().equalsIgnoreCase("")).count() == 0;
+    }   
     
 }
